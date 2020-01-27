@@ -1,0 +1,3 @@
+recursive-include p2d/config *
+recursive-include p2d/res *
+recursive-include p2d/tests *

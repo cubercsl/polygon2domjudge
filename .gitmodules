@@ -1,0 +1,3 @@
+[submodule "p2d/res/testlib"]
+	path = p2d/res/testlib
+	url = https://github.com/cn-xcpc-tools/testlib-for-domjudge
