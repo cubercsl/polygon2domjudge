@@ -1,3 +1,3 @@
-testlib: testlib.h # testlib-for-domjudge
+testlib: testlib/testlib.h # testlib-for-domjudge
 desc: .desc # extension of desc
 out: .a  # extension of output
