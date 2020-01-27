@@ -38,5 +38,7 @@ setup(
     },
     python_requires='>=3.5',
     platforms='any',
-    install_requires=[]
+    install_requires=[
+        'PyYAML'
+    ]
 )
