@@ -31,6 +31,7 @@ setup(
     url='https://github.com/2014CAIS01/polygon2domjudge',
     license='MIT',
     packages=find_packages(),
+    include_package_data=True,
     entry_points={
         'console_scripts': [
             'p2d=p2d.main:main'
