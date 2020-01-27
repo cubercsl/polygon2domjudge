@@ -1,4 +1,3 @@
-import os
 import re
 
 from . import config
@@ -23,9 +22,9 @@ class Problem(object):
         Args:
             problem_name (str): problem name
             problem_spec (dict): dictionary containing the specification
-                of the problem. 
+                of the problem.
         """
-        if not re.match(r'\w', problem_name):
+        if not re.match('^[a-zA-Z0-9][a-zA-Z0-9_.-]*[a-zA-Z0-9]$', problem_name):
             raise ProblemConfigError('Invalid Problem Name "%s"' % problem_name)
         self.problem_name = problem_name
         self.probid = None

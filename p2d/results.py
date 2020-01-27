@@ -57,8 +57,8 @@ class Results(object):
                 raise ResultConfigError('Config file error: result names must be strings, but %s is %s.' %
                                         (result_name, type(result_name)))
             if not isinstance(tags_list, list):
-                raise ResultConfigError(
-                    'Config file error: tags list must be a list, but tags of result %s is %s.' % (result_name, type(tags_list)))
+                raise ResultConfigError('Config file error: tags list must be a list, but tags of result %s is %s.' %
+                                        (result_name, type(tags_list)))
 
             if result_name not in self.results:
                 self.results[result_name] = Result(result_name, tags_list)

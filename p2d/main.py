@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 from __future__ import print_function
-import hashlib
 import logging
 import os
 import re
@@ -11,10 +10,9 @@ import xml.etree.ElementTree
 import yaml
 
 from argparse import ArgumentParser, ArgumentTypeError
-from . import config
 from . import checkers
+from . import misc
 from . import problems
-from . import tests
 from . import results
 
 
@@ -56,11 +54,11 @@ class ProblemAspect:
 
 class ProblemConfig(ProblemAspect):
 
-    __DEFAULT_CONFIG = {
+    __DEFAULT_CONFIG = problems.Problem('DEFAULT', {
         'probid': 'PROB01',
         'color': '#000000',
         'samples': 1
-    }
+    })
 
     def __init__(self, problem):
         self.debug('Parse \'problem.xml\'')
@@ -68,24 +66,22 @@ class ProblemConfig(ProblemAspect):
         self.configfile = os.path.join(problem.probdir, 'problem.xml')
         self._data = None
         if os.path.isfile(self.configfile):
-            try:
-                config = Problem.problem_config.problems.get(problem.shortname,
-                                                             problems.Problem(problem.shortname, ProblemConfig.__DEFAULT_CONFIG))
-                self._data = xml.etree.ElementTree.parse(self.configfile)
-                self.name = self._data.find('names').find('name').attrib['value']
-                self.timelimit = str(float(self._data.find('judging').find('testset').find('time-limit').text) / 1000.0)
-                self.checker = self._data.find('assets').find('checker')
-                self.interactor = self._data.find('assets').find('interactor')
-                self.probid = config.probid
-                self.color = config.color
-                self.samples = config.samples
-                self.validation = config.validation
-                self.validator_flags = config.validator_flags
-                self.debug('Problem Name: %s' % self.name)
-                self.debug('Time Limit: %s' % self.timelimit)
-            except Exception as e:
-                self.error(e)
-                raise
+            config = Problem.problem_config.problems.get(problem.shortname)
+            if config is None:
+                self.warning('Can not find config of %s, use default.' % problem.shortname)
+                config = ProblemConfig.__DEFAULT_CONFIG
+            self._data = xml.etree.ElementTree.parse(self.configfile)
+            self.name = self._data.find('names').find('name').attrib['value']
+            self.timelimit = str(float(self._data.find('judging').find('testset').find('time-limit').text) / 1000.0)
+            self.checker = self._data.find('assets').find('checker')
+            self.interactor = self._data.find('assets').find('interactor')
+            self.probid = config.probid
+            self.color = config.color
+            self.samples = config.samples
+            self.validation = config.validation
+            self.validator_flags = config.validator_flags
+            self.debug('Problem Name: %s' % self.name)
+            self.debug('Time Limit: %s' % self.timelimit)
 
     def __str__(self):
         return 'problem configuration'
@@ -135,19 +131,11 @@ class OutputValidator(ProblemAspect):
     def __str__(self):
         return 'output validators'
 
-    @staticmethod
-    def _get_md5(source):
-        if source is None:
-            return None
-        with open(source, 'r', encoding='utf-8') as f:
-            file_md5 = hashlib.md5(f.read().replace('\r\n', '\n').encode('utf-8'))
-        return file_md5.hexdigest().lower()
-
     def process(self):
         self.info('Add output validator')
         if not self._source.endswith('.cpp'):
             self.error('only support checker/interactor written with testlib.')
-        testlib = Problem.test_config.testlib
+        testlib = Problem.misc_config.testlib
         data = {}
         with open(os.path.join(self._problem.tmpdir, 'problem.yaml'), 'w', encoding='utf-8') as yaml_file:
             if self._problem.is_interactive:
@@ -160,19 +148,19 @@ class OutputValidator(ProblemAspect):
                 shutil.copyfile(self._source, os.path.join(self._problem.tmpdir,
                                                            'output_validator', 'interactor', 'interactor.cpp'))
             else:
-                checker_md5 = OutputValidator._get_md5(self._source)
+                checker_name = Problem.checker_config.detect_checker(self._source)
                 if self._source is None:
                     self.info('  Use default checker')
                     data['validation'] = 'default'
                     if self._problem.config.validator_flags is not None:
                         data['validator_flags'] = self._problem.config.validator_flags
                     yaml.safe_dump(data, yaml_file, default_flow_style=False)
-                elif checker_md5 in Problem.checker_config.md5sums.keys():
-                    checker_name = Problem.checker_config.md5sums[checker_md5]
+                elif checker_name is not None:
                     self.info('  find std checker: std::%s' % checker_name)
                     data['validation'] = 'default'
                     validator_flags = Problem.checker_config.checkers[checker_name].validator_flags
-                    if validator_flags is not None: data['validator_flags'] = validator_flags
+                    if validator_flags is not None:
+                        data['validator_flags'] = validator_flags
                     yaml.safe_dump(data, yaml_file, default_flow_style=False)
                 else:
                     self.info('Use custom checker')
@@ -210,9 +198,9 @@ class TestCases(ProblemAspect):
         self._problem.ensure_dir('data', 'sample')
         self._problem.ensure_dir('data', 'secret')
 
-        for test in filter(lambda x: not x.endswith(Problem.test_config.out), os.listdir(self._tests)):
+        for test in filter(lambda x: not x.endswith(Problem.misc_config.out), os.listdir(self._tests)):
             input_src = os.path.join(self._tests, test)
-            output_src = os.path.join(self._tests, test + Problem.test_config.out)
+            output_src = os.path.join(self._tests, test + Problem.misc_config.out)
             self._check_newlines(input_src)
             self._check_newlines(output_src)
             if test in self._samples:
@@ -226,7 +214,7 @@ class TestCases(ProblemAspect):
             try:
                 shutil.copyfile(input_src, input_dst)
                 shutil.copyfile(output_src, output_dst)
-            except:
+            except FileNotFoundError:
                 self.error('data not found')
 
 
@@ -260,22 +248,23 @@ class Submissions(ProblemAspect):
         for result in Problem.result_config.results.keys():
             self._problem.ensure_dir('submissions', result)
 
-        for desc in filter(lambda x: x.endswith(Problem.test_config.desc), os.listdir(self._submissions)):
+        for desc in filter(lambda x: x.endswith(Problem.misc_config.desc), os.listdir(self._submissions)):
             submission, result = self.__get_submission(desc)
             src = os.path.join(self._submissions, submission)
             dst = os.path.join(self._problem.tmpdir, 'submissions', result, submission)
             try:
                 shutil.copyfile(src, dst)
                 self.info('  %s (Expected Result: %s)' % (submission, result))
-            except:
+            except FileNotFoundError:
                 self.error('submission not found')
+
 
 class Problem(ProblemAspect):
 
     problem_config = None
     checker_config = checkers.load_checker_config()
     result_config = results.load_result_config()
-    test_config = tests.load_test_config()
+    misc_config = misc.load_misc_config()
 
     def __init__(self, probdir):
         self.probdir = os.path.realpath(probdir)
@@ -283,18 +272,25 @@ class Problem(ProblemAspect):
         self.check_basename(self.shortname)
 
     def __enter__(self):
+
+        ProblemAspect.errors = 0
+        ProblemAspect.warnings = 0
+
         self.tmpdir = tempfile.mkdtemp(prefix='%s-domjudge' % self.shortname)
         if not os.path.isdir(self.probdir):
             self.error("Problem directory '%s' not found" % self.probdir)
             self.shortname = None
             return self
 
-        # self.statement = ProblemStatement(self)
-        self.config = ProblemConfig(self)
-        self.is_interactive = self.config.interactor is not None
-        self.output_validator = OutputValidator(self)
-        self.testdata = TestCases(self)
-        self.submissions = Submissions(self)
+        try:
+            # self.statement = ProblemStatement(self)
+            self.config = ProblemConfig(self)
+            self.is_interactive = self.config.interactor is not None
+            self.output_validator = OutputValidator(self)
+            self.testdata = TestCases(self)
+            self.submissions = Submissions(self)
+        except ProcessError:
+            self.shortname = None
 
         return self
 
@@ -314,10 +310,6 @@ class Problem(ProblemAspect):
         if args is None:
             args = default_args()
 
-        ProblemAspect.errors = 0
-        ProblemAspect.warnings = 0
-        ProblemAspect.consider_warnings_errors = args.werror
-        
         try:
             part_mapping = {
                 'config': self.config,
@@ -329,7 +321,7 @@ class Problem(ProblemAspect):
             for part in part_mapping.keys():
                 self.msg('Add %s' % part)
                 part_mapping[part].process()
-            
+
             self.msg('Make archive')
             shutil.make_archive(self.shortname, 'zip', self.tmpdir)
 
@@ -356,9 +348,10 @@ def main():
     args = argparser().parse_args()
 
     fmt = "%(levelname)s %(message)s"
-    
+
     logging.basicConfig(stream=sys.stdout, format=fmt, level=eval("logging." + args.log_level.upper()))
 
+    ProblemAspect.consider_warnings_errors = args.werror
     total_errors = 0
 
     Problem.problem_config = problems.load_problem_config(os.path.realpath(args.problemsetdir))
@@ -375,14 +368,15 @@ def main():
                     return '' if x == 1 else 's'
                 print("%s finished: %d error%s, %d warning%s" %
                       (prob.shortname, errors, p(errors), warnings, p(warnings)))
-                if errors: error_list.append(os.path.basename(os.path.realpath(problemdir))) 
+                if errors:
+                    error_list.append(os.path.basename(os.path.realpath(problemdir)))
                 total_errors += errors
-    
+
     if error_list:
         print('These problem got errors:')
         for item in error_list:
             print('  ' + item)
-    
+
     sys.exit(1 if total_errors > 0 else 0)
 
 

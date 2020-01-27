@@ -36,6 +36,7 @@ setup(
             'p2d=p2d.main:main'
         ]
     },
+    python_requires='>=3.5',
     platforms='any',
     install_requires=[]
 )
