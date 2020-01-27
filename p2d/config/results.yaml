@@ -1,0 +1,20 @@
+# DOMjudge jury submission results
+# remap to polygon package solution tag
+# DO NOT CHANGE IT UNLESS YOU KNOW WHAT YOU ARE DOING
+accepted:
+  - MAIN
+  - ACCEPTED
+
+wrong_answer:
+  - WRONG_ANSWER
+  - PRESENTATION_ERROR
+
+time_limit_exceed:
+  - TIME_LIMIT_EXCEEDED
+  - TIME_LIMIT_EXCEEDED_OR_ACCEPTED
+
+run_time_error: # In domjudge MLE will be RTE
+  - TIME_LIMIT_EXCEEDED_OR_MEMORY_LIMIT_EXCEEDED
+  - MEMORY_LIMIT_EXCEEDED
+  - REJECTED
+  - FAILED

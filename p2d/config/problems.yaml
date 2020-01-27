@@ -1,0 +1,12 @@
+# configuration for problems
+# DO NOT CHANGE IT UNLESS YOU KNOW WHAT YOU ARE DOING
+# YOU CAN ADD YOUR OWN PROBLEM CONFIGURATION IN YOUR PROBLEM DIR
+hello:
+  probid: hello # default 'PROB01'
+  color: '#FF0000' # must be RGB colors default '#000000'
+  samples: 1  # must be less than 100, default 1
+  # By default, we use output validator remap in 'checkers.yaml'
+  # If you want to force use default validator and its flags,
+  # please use the following lines.
+  validation: default  
+  validator_flags: case_sensitive

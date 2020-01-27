@@ -1,0 +1,36 @@
+# std checkers given by polygon
+# remap to default output validator in domjudge and their flags
+# DO NOT CHANGE IT UNLESS YOU KNOW WHAT YOU ARE DOING
+fcmp:
+  md5sum: 504168fb5f80beb55d90d453633b50ff
+  validator_flags: case_sensitive space_change_sensitive
+
+hcmp:
+  md5sum: fd50c77a483254949a69bc07e83a056c
+
+lcmp:
+  md5sum: 28cda0257b7aaedd6c348194b75a0447
+
+ncmp:
+  md5sum: 0509bc8c7a3e4a2219d9ca39e5bf3ce8
+
+nyesno:
+  md5sum: dd628828076360fb6f12582864ed0625
+
+rcmp4:
+  md5sum: c64791ffeb412ceb0602d51e86eb220d
+  validator_flags: float_tolerance 1e-4
+
+rcmp6:
+  md5sum: 1ed169c6f859507746ddc061f06ff7b2
+  validator_flags: float_tolerance 1e-6
+  
+rcmp9:
+  md5sum: 84e6c5cb24799378d1e04e95d6e961b2
+  validator_flags: float_tolerance 1e-9
+
+wcmp:
+  md5sum: fecbdb15ac0b93226fa74dab3169da9d
+
+yesno:
+  md5sum: 8e03582d85b4f398f6b36f8dd17fc5a5
