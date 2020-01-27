@@ -33,7 +33,7 @@ def load_config(configuration_file, *args):
             res = new_config
         elif new_config is not None:
             __update_dict(res, new_config)
-     
+
     return res
 
 

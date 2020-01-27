@@ -1,3 +1,4 @@
+import hashlib
 import re
 
 from . import config
@@ -21,9 +22,9 @@ class Checker(object):
         Args:
             checker_name (str): checker name
             checker_spec (dict): dictionary containing the specification
-                of the checker. 
+                of the checker.
         """
-        if not re.match(r'\w', checker_name):
+        if not re.match('^[a-zA-Z0-9][a-zA-Z0-9_.-]*[a-zA-Z0-9]$', checker_name):
             raise CheckerConfigError('Invalid Checker Name "%s"' % checker_name)
         self.checker_name = checker_name
         self.md5sum = None
@@ -77,7 +78,7 @@ class Checkers(object):
                 See documentation of update() method below for details.
         """
         self.checkers = {}
-        self.md5sums = {}
+        self._md5sums = {}
         if data is not None:
             self.update(data)
 
@@ -106,12 +107,29 @@ class Checkers(object):
             else:
                 self.checkers[checker_name].update(checker_spec)
 
-        self.md5sums.clear()
+        self._md5sums.clear()
         for (checker_name, checker) in self.checkers.items():
-            if checker.md5sum in self.md5sums:
+            if checker.md5sum in self._md5sums:
                 raise CheckerConfigError('Checkers %s and %s both have md5sum %s.' %
-                                         (checker_name, self.md5sums[checker.md5sum], checker.md5sum))
-            self.md5sums[checker.md5sum] = checker_name
+                                         (checker_name, self._md5sums[checker.md5sum], checker.md5sum))
+            self._md5sums[checker.md5sum] = checker_name
+
+    @staticmethod
+    def _get_md5(source):
+        if source is None:
+            return None
+        with open(source, 'r', encoding='utf-8') as f:
+            file_md5 = hashlib.md5(f.read().replace('\r\n', '\n').encode('utf-8'))
+        return file_md5.hexdigest().lower()
+
+    def detect_checker(self, source):
+        """Get the checker name for the given source.
+        Args:
+            source (byte): path of the source file.
+        Returns:
+            checker name of the source, or None if don't know.
+        """
+        return self._md5sums.get(Checkers._get_md5(source))
 
 
 def load_checker_config():

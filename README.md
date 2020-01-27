@@ -2,6 +2,9 @@
 
 Process Polygon Package to DOMjudge Package.
 
+Master: [![Build Status](https://travis-ci.org/2014CAIS01/polygon2domjudge.svg?branch=master)](https://travis-ci.org/2014CAIS01/polygon2domjudge)
+Develop: [![Build Status](https://travis-ci.org/2014CAIS01/polygon2domjudge.svg?branch=develop)](https://travis-ci.org/2014CAIS01/polygon2domjudge)
+
 ## Usage
 
 Running `p2d` in the problemset directory, you will get these three problem packages if process with no errors.
@@ -32,7 +35,7 @@ With this second option, in order to get the command line scripts, you need to m
 
 If you intend to help develop polygon2domjudge, or if you just want a bare-bones way of running them, this is your option.
 
-For this method, you need to clone the repository (just downloading a zip archive of it does not work, because the project has submodules that are not included in that zip archive).
+For this method, you need to clone the repository.
 
 When this is done, you can run the program `bin/p2d.sh` directly from the repository.
 
@@ -66,5 +69,5 @@ For more details on the format of the checker specifications and what the defaul
 
 3. `problems.yaml`: Use it to specify every problem's code, color, number of samples in your problemset. You can put it at your problemset directory. See the example [problems.yaml](p2d/config/problems.yaml) for detail.
 
-4. `tests.yaml`: `testlib` PATH and some other configuration on developing. If you are not sure whether you should use it, then you probably shouldn't.
+4. `misc.yaml`: `testlib` PATH and some other configuration on developing. If you are not sure whether you should use it, then you probably shouldn't.
 
