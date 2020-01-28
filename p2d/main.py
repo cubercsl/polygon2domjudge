@@ -287,7 +287,7 @@ class Problem(ProblemAspect):
             self.output_validator = OutputValidator(self)
             self.testdata = TestCases(self)
             self.submissions = Submissions(self)
-        except ProcessError:
+        except Exception: # maybe the directory is not a valid problem package
             self.shortname = None
 
         return self
