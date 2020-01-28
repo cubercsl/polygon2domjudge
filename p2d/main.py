@@ -10,10 +10,13 @@ import xml.etree.ElementTree
 import yaml
 
 from argparse import ArgumentParser, ArgumentTypeError
+
 from . import checkers
 from . import misc
 from . import problems
 from . import results
+
+from ._version import __version__
 
 
 class ProcessError(Exception):
@@ -334,6 +337,7 @@ class Problem(ProblemAspect):
 def argparser():
     parser = ArgumentParser(description='Process Polygon Package to Domjudge Package.')
     parser.add_argument('problemsetdir', help='path of the polygon packages')
+    parser.add_argument('-v', '--version', action='version', version='%(prog)s ' + __version__)
     parser.add_argument('-l', '--log_level', default='info',
                         help='set log level (debug, info, warning, error, critical)')
     parser.add_argument('-e', '--werror', action='store_true', help='consider warnings as errors')
