@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-from __future__ import print_function
 import logging
 import os
 import re
@@ -7,15 +5,14 @@ import shutil
 import sys
 import tempfile
 import xml.etree.ElementTree
-import yaml
+from argparse import ArgumentParser
 
-from argparse import ArgumentParser, ArgumentTypeError
+import yaml
 
 from . import checkers
 from . import misc
 from . import problems
 from . import results
-
 from ._version import __version__
 
 
@@ -56,7 +53,6 @@ class ProblemAspect:
 
 
 class ProblemConfig(ProblemAspect):
-
     __DEFAULT_CONFIG = problems.Problem('DEFAULT', {
         'probid': 'PROB01',
         'color': '#000000',
@@ -263,7 +259,6 @@ class Submissions(ProblemAspect):
 
 
 class Problem(ProblemAspect):
-
     problem_config = None
     checker_config = checkers.load_checker_config()
     result_config = results.load_result_config()
@@ -272,7 +267,7 @@ class Problem(ProblemAspect):
     def __init__(self, probdir):
         self.probdir = os.path.realpath(probdir)
         self.shortname = os.path.basename(probdir)
-        self.check_basename(self.shortname)
+        # self.check_basename(self.shortname)
 
     def __enter__(self):
 
@@ -370,6 +365,7 @@ def main():
 
                 def p(x):
                     return '' if x == 1 else 's'
+
                 print("%s finished: %d error%s, %d warning%s" %
                       (prob.shortname, errors, p(errors), warnings, p(warnings)))
                 if errors:
