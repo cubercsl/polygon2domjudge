@@ -2,10 +2,11 @@
 
 Process Polygon Package to DOMjudge Package.
 
-![](https://img.shields.io/github/license/2014CAIS01/polygon2domjudge)
+**I may not have time to maintain this tool. If anyone is interested in maintaining this project or refactoring the code, please open an issue and PR is welcomed. **
 
-Master: [![Build Status](https://travis-ci.org/2014CAIS01/polygon2domjudge.svg?branch=master)](https://travis-ci.org/2014CAIS01/polygon2domjudge)
-Develop: [![Build Status](https://travis-ci.org/2014CAIS01/polygon2domjudge.svg?branch=develop)](https://travis-ci.org/2014CAIS01/polygon2domjudge)
+![](https://img.shields.io/github/license/cubercsl/polygon2domjudge)
+
+Master: [![Build Status](https://travis-ci.org/cubercsl/polygon2domjudge.svg?branch=master)](https://travis-ci.org/cubercsl/polygon2domjudge)
 
 ## Usage
 
