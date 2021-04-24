@@ -141,7 +141,7 @@ class OutputValidator(ProblemAspect):
                 self.info('Use custom interactor')
                 data['validation'] = 'custom interactive'
                 yaml.safe_dump(data, yaml_file)
-                self._problem.ensure_dir('output_validator', 'interactor')
+                self._problem.ensure_dir('output_validators', 'interactor')
                 shutil.copyfile(testlib, os.path.join(self._problem.tmpdir,
                                                       'output_validator', 'interactor', 'testlib.h'))
                 shutil.copyfile(self._source, os.path.join(self._problem.tmpdir,
@@ -165,7 +165,7 @@ class OutputValidator(ProblemAspect):
                     self.info('Use custom checker')
                     data['validation'] = 'custom'
                     yaml.safe_dump(data, yaml_file, default_flow_style=False)
-                    self._problem.ensure_dir('output_validator', 'checker')
+                    self._problem.ensure_dir('output_validators', 'checker')
                     shutil.copyfile(testlib, os.path.join(self._problem.tmpdir,
                                                           'output_validator', 'checker', 'testlib.h'))
                     shutil.copyfile(self._source, os.path.join(self._problem.tmpdir,
