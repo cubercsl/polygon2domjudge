@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-from __future__ import print_function
 import logging
 import os
 import re
@@ -7,13 +5,15 @@ import shutil
 import sys
 import tempfile
 import xml.etree.ElementTree
+from argparse import ArgumentParser
+
 import yaml
 
-from argparse import ArgumentParser, ArgumentTypeError
 from . import checkers
 from . import misc
 from . import problems
 from . import results
+from ._version import __version__
 
 
 class ProcessError(Exception):
@@ -53,7 +53,6 @@ class ProblemAspect:
 
 
 class ProblemConfig(ProblemAspect):
-
     __DEFAULT_CONFIG = problems.Problem('DEFAULT', {
         'probid': 'PROB01',
         'color': '#000000',
@@ -142,7 +141,7 @@ class OutputValidator(ProblemAspect):
                 self.info('Use custom interactor')
                 data['validation'] = 'custom interactive'
                 yaml.safe_dump(data, yaml_file)
-                self._problem.ensure_dir('output_validator', 'interactor')
+                self._problem.ensure_dir('output_validators', 'interactor')
                 shutil.copyfile(testlib, os.path.join(self._problem.tmpdir,
                                                       'output_validator', 'interactor', 'testlib.h'))
                 shutil.copyfile(self._source, os.path.join(self._problem.tmpdir,
@@ -166,7 +165,7 @@ class OutputValidator(ProblemAspect):
                     self.info('Use custom checker')
                     data['validation'] = 'custom'
                     yaml.safe_dump(data, yaml_file, default_flow_style=False)
-                    self._problem.ensure_dir('output_validator', 'checker')
+                    self._problem.ensure_dir('output_validators', 'checker')
                     shutil.copyfile(testlib, os.path.join(self._problem.tmpdir,
                                                           'output_validator', 'checker', 'testlib.h'))
                     shutil.copyfile(self._source, os.path.join(self._problem.tmpdir,
@@ -260,7 +259,6 @@ class Submissions(ProblemAspect):
 
 
 class Problem(ProblemAspect):
-
     problem_config = None
     checker_config = checkers.load_checker_config()
     result_config = results.load_result_config()
@@ -269,7 +267,7 @@ class Problem(ProblemAspect):
     def __init__(self, probdir):
         self.probdir = os.path.realpath(probdir)
         self.shortname = os.path.basename(probdir)
-        self.check_basename(self.shortname)
+        # self.check_basename(self.shortname)
 
     def __enter__(self):
 
@@ -289,7 +287,7 @@ class Problem(ProblemAspect):
             self.output_validator = OutputValidator(self)
             self.testdata = TestCases(self)
             self.submissions = Submissions(self)
-        except ProcessError:
+        except Exception: # maybe the directory is not a valid problem package
             self.shortname = None
 
         return self
@@ -334,6 +332,7 @@ class Problem(ProblemAspect):
 def argparser():
     parser = ArgumentParser(description='Process Polygon Package to Domjudge Package.')
     parser.add_argument('problemsetdir', help='path of the polygon packages')
+    parser.add_argument('-v', '--version', action='version', version='%(prog)s ' + __version__)
     parser.add_argument('-l', '--log_level', default='info',
                         help='set log level (debug, info, warning, error, critical)')
     parser.add_argument('-e', '--werror', action='store_true', help='consider warnings as errors')
@@ -366,6 +365,7 @@ def main():
 
                 def p(x):
                     return '' if x == 1 else 's'
+
                 print("%s finished: %d error%s, %d warning%s" %
                       (prob.shortname, errors, p(errors), warnings, p(warnings)))
                 if errors:
